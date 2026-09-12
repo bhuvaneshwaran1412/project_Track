@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agile Analytics & Burndown | Student Project Management</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="dashboard-page">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="student-dashboard.html">
+        🎓 Student ProjectHub
+      </a>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#analyticsNavbarMenu"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="analyticsNavbarMenu">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item">
+            <a href="student-dashboard.html" class="nav-link text-white">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a href="team-management.html" class="nav-link text-white">Team</a>
+          </li>
+          <li class="nav-item">
+            <a href="backlog.html" class="nav-link text-white">Backlog</a>
+          </li>
+          <li class="nav-item">
+            <a href="sprints.html" class="nav-link text-white">Sprints</a>
+          </li>
+          <li class="nav-item">
+            <a href="tasks.html" class="nav-link text-white">Tasks</a>
+          </li>
+          <li class="nav-item">
+            <a href="kanban.html" class="nav-link text-white">Kanban</a>
+          </li>
+          <li class="nav-item">
+            <a href="project-files.html" class="nav-link text-white">Files</a>
+          </li>
+          <li class="nav-item">
+            <a href="analytics.html" class="nav-link text-white active fw-semibold">Analytics</a>
+          </li>
+          <li class="nav-item ms-lg-2">
+            <button id="logoutButton" class="btn btn-light btn-sm">
+              Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4 py-md-5">
+    <div id="analyticsMessage"></div>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+      <div>
+        <h1 class="h2 fw-bold mb-1">📊 Agile Analytics & Burndown</h1>
+        <p class="text-secondary mb-0">
+          Track sprint burn rates, team member contribution metrics, and project audit activities.
+        </p>
+      </div>
+
+      <div class="d-flex gap-2 mt-3 mt-md-0">
+        <button id="refreshAnalyticsBtn" class="btn btn-outline-primary">
+          🔄 Refresh Charts
+        </button>
+      </div>
+    </div>
+
+    <!-- Project & Sprint Selector Card -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-6">
+            <label for="analyticsProjectSelect" class="form-label fw-semibold mb-1">
+              Select Project
+            </label>
+            <select id="analyticsProjectSelect" class="form-select">
+              <option value="">Loading projects...</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label for="analyticsSprintSelect" class="form-label fw-semibold mb-1">
+              Select Sprint for Burndown Chart
+            </label>
+            <select id="analyticsSprintSelect" class="form-select" disabled>
+              <option value="">Choose a project first</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Dashboard View -->
+    <div id="analyticsContent" class="d-none">
+      <!-- Sprint Metrics Summary Row -->
+      <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+          <div class="card dashboard-card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <p class="text-secondary small text-uppercase fw-semibold mb-1">Sprint Status</p>
+              <h3 id="statSprintStatus" class="h4 fw-bold mb-0 text-primary">--</h3>
+              <span id="statSprintDates" class="small text-secondary">Start - End</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="card dashboard-card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <p class="text-secondary small text-uppercase fw-semibold mb-1">Total Story Points</p>
+              <h3 id="statTotalStoryPoints" class="h4 fw-bold mb-0 text-info">0 pts</h3>
+              <span id="statTotalTasks" class="small text-secondary">0 sprint tasks</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="card dashboard-card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <p class="text-secondary small text-uppercase fw-semibold mb-1">Completed Tasks</p>
+              <h3 id="statCompletedTasks" class="h4 fw-bold mb-0 text-success">0</h3>
+              <span id="statCompletionPct" class="small text-secondary">0% velocity</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-lg-3">
+          <div class="card dashboard-card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <p class="text-secondary small text-uppercase fw-semibold mb-1">Active Team Size</p>
+              <h3 id="statTeamSize" class="h4 fw-bold mb-0 text-warning">0</h3>
+              <span class="small text-secondary">Collaborating members</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1: Burndown Chart -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+              <div>
+                <h2 class="h5 fw-bold mb-0">📉 Sprint Burndown Chart</h2>
+                <span class="small text-secondary">Ideal burn trajectory vs. Actual remaining workload</span>
+              </div>
+              <span id="burndownMetricBadge" class="badge text-bg-primary">Story Points</span>
+            </div>
+            <div class="card-body p-3 p-md-4">
+              <div style="position: relative; height: 320px; width: 100%;">
+                <canvas id="burndownChartCanvas"></canvas>
+              </div>
+              <div id="burndownEmptyState" class="text-center py-5 d-none">
+                <p class="text-secondary mb-0">No sprint tasks or story points found for this sprint.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task Priority & Distribution -->
+        <div class="col-lg-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+              <h2 class="h5 fw-bold mb-0">🎯 Task Priority Balance</h2>
+              <span class="small text-secondary">Breakdown across all project tasks</span>
+            </div>
+            <div class="card-body p-3 p-md-4 d-flex flex-column justify-content-center">
+              <div style="position: relative; height: 260px; width: 100%;">
+                <canvas id="priorityChartCanvas"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2: Team Member Contribution & Activity Feed -->
+      <div class="row g-4">
+        <!-- Team Contribution -->
+        <div class="col-lg-7">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+              <h2 class="h5 fw-bold mb-0">👥 Individual Contribution Breakdown</h2>
+              <span class="small text-secondary">Completed tasks and story point contributions per team member</span>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Team Member</th>
+                      <th>Role</th>
+                      <th>Tasks (Done / Total)</th>
+                      <th>Story Points</th>
+                      <th>Contribution</th>
+                    </tr>
+                  </thead>
+                  <tbody id="memberContributionTableBody">
+                    <tr>
+                      <td colspan="5" class="text-center py-4 text-secondary">
+                        Loading member contributions...
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Activity Feed -->
+        <div class="col-lg-5">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+              <div>
+                <h2 class="h5 fw-bold mb-0">⚡ Project Activity Feed</h2>
+                <span class="small text-secondary">Real-time audit log</span>
+              </div>
+              <span id="activityCountBadge" class="badge text-bg-light border">0 events</span>
+            </div>
+            <div class="card-body p-3" style="max-height: 420px; overflow-y: auto;">
+              <ul id="activityFeedList" class="list-unstyled mb-0 activity-timeline">
+                <li class="text-center py-4 text-secondary">
+                  Loading activity feed...
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty / Placeholder State -->
+    <div id="analyticsPlaceholder" class="card border-0 shadow-sm text-center py-5">
+      <div class="card-body">
+        <h2 class="h5 fw-bold mb-2">Select a Project to View Agile Analytics</h2>
+        <p class="text-secondary mb-0">
+          Choose a project above to inspect sprint burndown lines, member contributions, and real-time activity feeds.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  ></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
+

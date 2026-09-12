@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Student Project Management</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dashboard-page">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-warning" href="admin-dashboard.html">
+        🛡️ Admin Portal | ProjectHub
+      </a>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#adminNavbarMenu"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="adminNavbarMenu">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item">
+            <span class="nav-link text-light">
+              Welcome, <span id="adminName" class="fw-bold">Admin</span>
+            </span>
+          </li>
+          <li class="nav-item">
+            <a href="admin-dashboard.html" class="nav-link text-light active">Admin Overview</a>
+          </li>
+          <li class="nav-item ms-lg-2">
+            <button id="adminLogoutButton" class="btn btn-outline-light btn-sm">
+              Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4 py-md-5">
+    <div id="adminMessage"></div>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+      <div>
+        <h1 class="h2 fw-bold mb-1">Platform Administration</h1>
+        <p class="text-secondary mb-0">
+          Monitor system metrics, manage student accounts, and oversee all academic projects.
+        </p>
+      </div>
+
+      <div class="d-flex gap-2 mt-3 mt-md-0">
+        <button id="adminRefreshBtn" class="btn btn-outline-primary">
+          🔄 Refresh Platform Data
+        </button>
+      </div>
+    </div>
+
+    <!-- Platform Stats Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="card dashboard-card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <p class="text-secondary small text-uppercase fw-semibold mb-1">Total Students</p>
+            <h2 id="adminTotalStudents" class="display-6 fw-bold mb-0 text-primary">0</h2>
+            <span id="adminActiveStudentsSubtext" class="small text-secondary">0 active accounts</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="card dashboard-card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <p class="text-secondary small text-uppercase fw-semibold mb-1">Total Projects</p>
+            <h2 id="adminTotalProjects" class="display-6 fw-bold mb-0 text-info">0</h2>
+            <span id="adminActiveProjectsSubtext" class="small text-secondary">0 active projects</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="card dashboard-card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <p class="text-secondary small text-uppercase fw-semibold mb-1">Active Sprints</p>
+            <h2 id="adminActiveSprints" class="display-6 fw-bold mb-0 text-warning">0</h2>
+            <span id="adminTotalSprintsSubtext" class="small text-secondary">0 total sprints</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-3">
+        <div class="card dashboard-card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <p class="text-secondary small text-uppercase fw-semibold mb-1">Tasks Completed</p>
+            <h2 id="adminCompletedTasks" class="display-6 fw-bold mb-0 text-success">0</h2>
+            <span id="adminTotalTasksSubtext" class="small text-secondary">0 total tasks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Accounts Table -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white py-3 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+        <div>
+          <h2 class="h5 fw-bold mb-0">👥 Student Accounts</h2>
+          <span class="small text-secondary">View and manage student account statuses</span>
+        </div>
+        <div class="w-auto">
+          <input
+            type="text"
+            id="studentSearchInput"
+            class="form-control form-control-sm"
+            placeholder="🔍 Filter students..."
+          >
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Student</th>
+                <th>Reg. Number</th>
+                <th>Email</th>
+                <th>Dept & Year</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminStudentsTableBody">
+              <tr>
+                <td colspan="6" class="text-center py-4 text-secondary">
+                  Loading student accounts...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform Projects Table -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+        <div>
+          <h2 class="h5 fw-bold mb-0">📁 Platform Projects</h2>
+          <span class="small text-secondary">All academic projects registered on the platform</span>
+        </div>
+        <div class="w-auto">
+          <input
+            type="text"
+            id="projectSearchInput"
+            class="form-control form-control-sm"
+            placeholder="🔍 Filter projects..."
+          >
+        </div>
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Project Code</th>
+                <th>Project Name</th>
+                <th>Team Lead</th>
+                <th>Faculty Guide</th>
+                <th>Members</th>
+                <th>Task Progress</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminProjectsTableBody">
+              <tr>
+                <td colspan="7" class="text-center py-4 text-secondary">
+                  Loading projects...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  ></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
+

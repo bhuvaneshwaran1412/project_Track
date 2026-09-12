@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sprints | Student Project Management</title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dashboard-page">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="student-dashboard.html">
+        Student Project Management
+      </a>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarMenu"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarMenu">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item">
+            <a href="student-dashboard.html" class="nav-link text-white">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a href="team-management.html" class="nav-link text-white">Team</a>
+          </li>
+          <li class="nav-item">
+            <a href="backlog.html" class="nav-link text-white">Backlog</a>
+          </li>
+          <li class="nav-item">
+            <a href="sprints.html" class="nav-link text-white active">Sprints</a>
+          </li>
+          <li class="nav-item">
+            <a href="tasks.html" class="nav-link text-white">Tasks</a>
+          </li>
+          <li class="nav-item">
+            <a href="kanban.html" class="nav-link text-white">Kanban</a>
+          </li>
+          <li class="nav-item">
+            <a href="project-files.html" class="nav-link text-white">Files</a>
+          </li>
+          <li class="nav-item">
+            <a href="analytics.html" class="nav-link text-white">Analytics</a>
+          </li>
+          <li class="nav-item ms-lg-2">
+            <button id="logoutButton" class="btn btn-light btn-sm">
+              Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4 py-md-5">
+    <a href="student-dashboard.html" class="text-decoration-none small">
+      ← Back to Dashboard
+    </a>
+
+    <div class="mt-3 mb-4">
+      <h1 class="h2 fw-bold">Sprint Management</h1>
+      <p class="text-secondary mb-0">
+        Create time-boxed iterations (usually 1-2 weeks), assign backlog user stories to sprints, and manage sprint lifecycle.
+      </p>
+    </div>
+
+    <div id="formMessage"></div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <label for="sprintProjectSelect" class="form-label fw-semibold">
+          Select Project
+        </label>
+        <select id="sprintProjectSelect" class="form-select">
+          <option value="">Loading projects...</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h2 class="h5 fw-bold mb-3">Create Sprint</h2>
+
+            <form id="sprintForm" novalidate>
+              <div class="mb-3">
+                <label for="sprintName" class="form-label fw-semibold">Sprint Name</label>
+                <input
+                  type="text"
+                  id="sprintName"
+                  class="form-control"
+                  placeholder="Example: Sprint 1 - Core Features"
+                  required
+                >
+              </div>
+
+              <div class="mb-3">
+                <label for="sprintGoal" class="form-label fw-semibold">Sprint Goal</label>
+                <textarea
+                  id="sprintGoal"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Example: Complete authentication, database setup, and user profile"
+                ></textarea>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label for="sprintStartDate" class="form-label fw-semibold">Start Date</label>
+                  <input
+                    type="date"
+                    id="sprintStartDate"
+                    class="form-control"
+                    required
+                  >
+                </div>
+
+                <div class="col-md-6">
+                  <label for="sprintEndDate" class="form-label fw-semibold">End Date</label>
+                  <input
+                    type="date"
+                    id="sprintEndDate"
+                    class="form-control"
+                    required
+                  >
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100">
+                Create Sprint
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h2 class="h5 fw-bold mb-3">Project Sprints</h2>
+
+            <div id="sprintList">
+              <p class="text-secondary mb-0">Select a project to view sprints.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  ></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
