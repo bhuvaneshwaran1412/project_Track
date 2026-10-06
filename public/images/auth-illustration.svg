@@ -1,0 +1,188 @@
+<svg width="480" height="420" viewBox="0 0 480 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background aura gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#fff8f2" stop-opacity="1"/>
+      <stop offset="65%" stop-color="#fae3d2" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#f5cdb6" stop-opacity="0.4"/>
+    </radialGradient>
+
+    <!-- Wine sphere gradients -->
+    <linearGradient id="planetGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b245a"/>
+      <stop offset="100%" stop-color="#551237"/>
+    </linearGradient>
+
+    <linearGradient id="planetGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8366e"/>
+      <stop offset="100%" stop-color="#691a45"/>
+    </linearGradient>
+
+    <linearGradient id="skullGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdfefc"/>
+      <stop offset="100%" stop-color="#e2ede0"/>
+    </linearGradient>
+
+    <linearGradient id="leafAmber" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#c65d36"/>
+      <stop offset="100%" stop-color="#e8985e"/>
+    </linearGradient>
+
+    <linearGradient id="leafWine" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#4d1233"/>
+      <stop offset="100%" stop-color="#8a2055"/>
+    </linearGradient>
+
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#4d1233" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background Ambient Glow & Aura -->
+  <circle cx="240" cy="210" r="190" fill="url(#bgGlow)"/>
+
+  <!-- Orbital Rings -->
+  <ellipse cx="60" cy="80" rx="90" ry="25" stroke="#ecc3aa" stroke-width="1.2" stroke-dasharray="3 4" transform="rotate(-20 60 80)"/>
+  <ellipse cx="390" cy="220" rx="110" ry="32" stroke="#ecc3aa" stroke-width="1.2" stroke-dasharray="4 4" transform="rotate(25 390 220)"/>
+
+  <!-- Planetary Sphere: Top Left -->
+  <circle cx="50" cy="70" r="48" fill="url(#planetGrad1)"/>
+  <path d="M 15 55 A 48 48 0 0 1 85 95" stroke="#f68cb6" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+  <ellipse cx="50" cy="70" rx="68" ry="14" stroke="#fce2d0" stroke-width="1.2" fill="none" opacity="0.6" transform="rotate(-15 50 70)"/>
+
+  <!-- Planetary Sphere: Mid Right -->
+  <circle cx="410" cy="120" r="18" fill="url(#planetGrad2)"/>
+  <circle cx="435" cy="215" r="9" fill="#c65d36" opacity="0.75"/>
+  <circle cx="100" cy="300" r="8" fill="#a8366e" opacity="0.65"/>
+
+  <!-- Star Dust / Little Floating Sparkles -->
+  <circle cx="270" cy="45" r="2" fill="#ba487b"/>
+  <circle cx="160" cy="75" r="2.5" fill="#ba487b" opacity="0.8"/>
+  <circle cx="340" cy="85" r="1.5" fill="#c65d36"/>
+  <circle cx="70" cy="180" r="2" fill="#ba487b" opacity="0.5"/>
+  <circle cx="400" cy="40" r="2" fill="#c65d36" opacity="0.6"/>
+  <circle cx="440" cy="170" r="1.5" fill="#ba487b"/>
+  <circle cx="180" cy="320" r="2" fill="#ba487b" opacity="0.4"/>
+  <circle cx="310" cy="325" r="2" fill="#c65d36" opacity="0.5"/>
+  <!-- Little dash sparkles -->
+  <path d="M285 30 L290 38" stroke="#d47055" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M370 65 L375 75" stroke="#a8366e" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Left Speech Bubble with Password Dots -->
+  <g filter="url(#softShadow)">
+    <rect x="85" y="145" width="84" height="34" rx="8" fill="#581439"/>
+    <path d="M160 179 L172 187 L165 174 Z" fill="#581439"/>
+    <!-- 6 White Password Dots -->
+    <circle cx="102" cy="162" r="3" fill="#ffffff"/>
+    <circle cx="112" cy="162" r="3" fill="#ffffff"/>
+    <circle cx="122" cy="162" r="3" fill="#ffffff"/>
+    <circle cx="132" cy="162" r="3" fill="#ffffff"/>
+    <circle cx="142" cy="162" r="3" fill="#ffffff"/>
+    <circle cx="152" cy="162" r="3" fill="#ffffff"/>
+  </g>
+
+  <!-- Right Speech Bubble with Password Dots -->
+  <g filter="url(#softShadow)">
+    <rect x="310" y="150" width="86" height="34" rx="8" fill="#581439"/>
+    <path d="M320 179 L308 187 L315 174 Z" fill="#581439"/>
+    <!-- 6 White Password Dots -->
+    <circle cx="328" cy="167" r="3" fill="#ffffff"/>
+    <circle cx="338" cy="167" r="3" fill="#ffffff"/>
+    <circle cx="348" cy="167" r="3" fill="#ffffff"/>
+    <circle cx="358" cy="167" r="3" fill="#ffffff"/>
+    <circle cx="368" cy="167" r="3" fill="#ffffff"/>
+    <circle cx="378" cy="167" r="3" fill="#ffffff"/>
+  </g>
+
+  <!-- Central Figure: Skeleton Coder -->
+  <!-- Skull Head -->
+  <path d="M195 160 C195 120, 285 120, 285 160 C285 178, 275 190, 268 194 C268 206, 260 210, 240 210 C220 210, 212 206, 212 194 C205 190, 195 178, 195 160 Z"
+        fill="url(#skullGrad)" stroke="#1a1c22" stroke-width="2.2" stroke-linejoin="round"/>
+  
+  <!-- Eye Sockets -->
+  <ellipse cx="222" cy="160" rx="9" ry="12" fill="#1c1d24"/>
+  <ellipse cx="258" cy="160" rx="9" ry="12" fill="#1c1d24"/>
+  <circle cx="224" cy="158" r="2.5" fill="#f8fafc" opacity="0.3"/>
+  <circle cx="260" cy="158" r="2.5" fill="#f8fafc" opacity="0.3"/>
+
+  <!-- Nasal cavity -->
+  <path d="M237 175 L240 171 L243 175 Z" fill="#1c1d24"/>
+
+  <!-- Teeth / Jawline -->
+  <path d="M225 193 Q240 197 255 193" stroke="#1c1d24" stroke-width="1.8" fill="none"/>
+  <line x1="230" y1="189" x2="230" y2="197" stroke="#1c1d24" stroke-width="1.5"/>
+  <line x1="236" y1="189" x2="236" y2="198" stroke="#1c1d24" stroke-width="1.5"/>
+  <line x1="244" y1="189" x2="244" y2="198" stroke="#1c1d24" stroke-width="1.5"/>
+  <line x1="250" y1="189" x2="250" y2="197" stroke="#1c1d24" stroke-width="1.5"/>
+
+  <!-- Spine / Neck -->
+  <rect x="235" y="211" width="10" height="7" rx="3" fill="#e2ede0" stroke="#1c1d24" stroke-width="1.8"/>
+  <rect x="235" y="219" width="10" height="7" rx="3" fill="#e2ede0" stroke="#1c1d24" stroke-width="1.8"/>
+  <rect x="235" y="227" width="10" height="7" rx="3" fill="#e2ede0" stroke="#1c1d24" stroke-width="1.8"/>
+  <rect x="235" y="235" width="10" height="7" rx="3" fill="#e2ede0" stroke="#1c1d24" stroke-width="1.8"/>
+
+  <!-- Rib Cage -->
+  <!-- Top ribs -->
+  <path d="M233 222 C205 220 180 235 178 250" stroke="#1c1d24" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M233 222 C205 220 180 235 178 250" stroke="#e2ede0" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <path d="M247 222 C275 220 300 235 302 250" stroke="#1c1d24" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M247 222 C275 220 300 235 302 250" stroke="#e2ede0" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Middle ribs -->
+  <path d="M233 230 C200 230 182 252 186 270" stroke="#1c1d24" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M233 230 C200 230 182 252 186 270" stroke="#e2ede0" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <path d="M247 230 C280 230 298 252 294 270" stroke="#1c1d24" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M247 230 C280 230 298 252 294 270" stroke="#e2ede0" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Lower ribs -->
+  <path d="M233 238 C208 244 195 264 202 280" stroke="#1c1d24" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M233 238 C208 244 195 264 202 280" stroke="#e2ede0" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <path d="M247 238 C272 244 285 264 278 280" stroke="#1c1d24" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M247 238 C272 244 285 264 278 280" stroke="#e2ede0" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- Arms reaching forward to keyboard -->
+  <!-- Left arm -->
+  <path d="M176 252 C168 280 185 298 210 295" stroke="#1c1d24" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M176 252 C168 280 185 298 210 295" stroke="#e2ede0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Right arm -->
+  <path d="M304 252 C312 280 295 298 270 295" stroke="#1c1d24" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M304 252 C312 280 295 298 270 295" stroke="#e2ede0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Laptop (Modern Silver Shell with Skull Sticker) -->
+  <g filter="url(#softShadow)">
+    <!-- Laptop screen back lid -->
+    <rect x="182" y="250" width="116" height="74" rx="7" fill="#e5e9f0" stroke="#1a1c24" stroke-width="2"/>
+    
+    <!-- Laptop Apple/Skull Logo Sticker on lid -->
+    <ellipse cx="240" cy="282" rx="9" ry="10" fill="#2d313d"/>
+    <ellipse cx="237" cy="280" rx="2" ry="3" fill="#ffffff"/>
+    <ellipse cx="243" cy="280" rx="2" ry="3" fill="#ffffff"/>
+    <rect x="238" y="289" width="4" height="4" rx="1" fill="#2d313d"/>
+    <line x1="239" y1="289" x2="239" y2="293" stroke="#ffffff" stroke-width="0.8"/>
+    <line x1="241" y1="289" x2="241" y2="293" stroke="#ffffff" stroke-width="0.8"/>
+  </g>
+
+  <!-- Laptop Base / Keyboard deck -->
+  <path d="M165 324 L315 324 L325 330 L155 330 Z" fill="#cbd5e1" stroke="#1a1c24" stroke-width="1.8"/>
+
+  <!-- Botanical / Organic Leaves Cluster at the Base -->
+  <!-- Left Side Leaves -->
+  <path d="M150 338 C130 320 115 285 140 270 C146 295 152 315 150 338 Z" fill="url(#leafWine)"/>
+  <path d="M165 338 C140 310 135 270 170 280 C168 305 168 325 165 338 Z" fill="url(#leafAmber)"/>
+  <path d="M178 340 C160 320 162 295 188 300 C184 318 182 332 178 340 Z" fill="#691a45"/>
+  <path d="M190 342 C178 330 180 312 198 316 C195 328 193 338 190 342 Z" fill="#e8985e"/>
+
+  <!-- Right Side Leaves -->
+  <path d="M330 338 C350 320 365 285 340 270 C334 295 328 315 330 338 Z" fill="url(#leafWine)"/>
+  <path d="M315 338 C340 310 345 270 310 280 C312 305 312 325 315 338 Z" fill="url(#leafAmber)"/>
+  <path d="M302 340 C320 320 318 295 292 300 C296 318 298 332 302 340 Z" fill="#691a45"/>
+  <path d="M290 342 C302 330 300 312 282 316 C285 328 287 338 290 342 Z" fill="#e8985e"/>
+
+  <!-- Center grounding mound/shadow -->
+  <ellipse cx="240" cy="342" rx="110" ry="12" fill="#581439" opacity="0.25"/>
+</svg>
+

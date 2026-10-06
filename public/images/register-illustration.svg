@@ -1,0 +1,115 @@
+<svg width="480" height="420" viewBox="0 0 480 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background aura gradient -->
+    <radialGradient id="bgGlowReg" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#fff8f2" stop-opacity="1"/>
+      <stop offset="65%" stop-color="#fae3d2" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#f5cdb6" stop-opacity="0.4"/>
+    </radialGradient>
+
+    <!-- Wine sphere gradients -->
+    <linearGradient id="planetGradReg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b245a"/>
+      <stop offset="100%" stop-color="#551237"/>
+    </linearGradient>
+
+    <linearGradient id="planetGradReg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a8366e"/>
+      <stop offset="100%" stop-color="#691a45"/>
+    </linearGradient>
+
+    <filter id="softShadowReg" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#4d1233" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Background Ambient Glow & Aura -->
+  <circle cx="240" cy="210" r="190" fill="url(#bgGlowReg)"/>
+
+  <!-- Orbital Rings -->
+  <ellipse cx="70" cy="80" rx="90" ry="25" stroke="#ecc3aa" stroke-width="1.2" stroke-dasharray="3 4" transform="rotate(-20 70 80)"/>
+  <ellipse cx="380" cy="220" rx="110" ry="32" stroke="#ecc3aa" stroke-width="1.2" stroke-dasharray="4 4" transform="rotate(25 380 220)"/>
+
+  <!-- Planetary Spheres -->
+  <circle cx="60" cy="70" r="44" fill="url(#planetGradReg1)"/>
+  <ellipse cx="60" cy="70" rx="60" ry="12" stroke="#fce2d0" stroke-width="1.2" fill="none" opacity="0.6" transform="rotate(-15 60 70)"/>
+  <circle cx="410" cy="115" r="18" fill="url(#planetGradReg2)"/>
+  <circle cx="430" cy="210" r="8" fill="#c65d36" opacity="0.75"/>
+  <circle cx="100" cy="290" r="9" fill="#a8366e" opacity="0.65"/>
+
+  <!-- Sparkles -->
+  <circle cx="260" cy="40" r="2" fill="#ba487b"/>
+  <circle cx="150" cy="80" r="2.5" fill="#ba487b" opacity="0.8"/>
+  <circle cx="340" cy="75" r="1.5" fill="#c65d36"/>
+  <circle cx="400" cy="40" r="2" fill="#c65d36" opacity="0.6"/>
+
+  <!-- Floating Agile Sprint Badges -->
+  <g filter="url(#softShadowReg)">
+    <rect x="80" y="140" width="115" height="34" rx="8" fill="#581439"/>
+    <circle cx="98" cy="157" r="5" fill="#10b981"/>
+    <text x="110" y="162" fill="#ffffff" font-family="sans-serif" font-size="11" font-weight="600">Sprint Backlog</text>
+  </g>
+
+  <g filter="url(#softShadowReg)">
+    <rect x="290" y="145" width="120" height="34" rx="8" fill="#581439"/>
+    <circle cx="308" cy="162" r="5" fill="#f59e0b"/>
+    <text x="320" y="167" fill="#ffffff" font-family="sans-serif" font-size="11" font-weight="600">Team Velocity</text>
+  </g>
+
+  <!-- Central Collaborative Board / Team Workspace Vector -->
+  <g filter="url(#softShadowReg)">
+    <!-- Workspace Desktop Card -->
+    <rect x="150" y="190" width="180" height="120" rx="14" fill="#ffffff" stroke="#1c1d24" stroke-width="2"/>
+    
+    <!-- Header bar -->
+    <rect x="150" y="190" width="180" height="24" rx="14" fill="#f8fafc"/>
+    <circle cx="166" cy="202" r="3.5" fill="#ef4444"/>
+    <circle cx="178" cy="202" r="3.5" fill="#f59e0b"/>
+    <circle cx="190" cy="202" r="3.5" fill="#10b981"/>
+    
+    <!-- Mini Kanban Columns on the card -->
+    <!-- Column 1: To Do -->
+    <rect x="162" y="222" width="46" height="74" rx="6" fill="#f1f5f9"/>
+    <rect x="167" y="228" width="36" height="16" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+    <rect x="170" y="234" width="20" height="3" rx="1.5" fill="#64748b"/>
+    <rect x="167" y="248" width="36" height="16" rx="4" fill="#ffffff" stroke="#e2e8f0"/>
+    <rect x="170" y="254" width="26" height="3" rx="1.5" fill="#64748b"/>
+
+    <!-- Column 2: In Progress -->
+    <rect x="217" y="222" width="46" height="74" rx="6" fill="#fef3c7"/>
+    <rect x="222" y="228" width="36" height="22" rx="4" fill="#ffffff" stroke="#fde68a"/>
+    <rect x="225" y="234" width="22" height="3" rx="1.5" fill="#d97706"/>
+    <circle cx="250" cy="242" r="3" fill="#681b45"/>
+
+    <!-- Column 3: Done -->
+    <rect x="272" y="222" width="46" height="74" rx="6" fill="#dcfce7"/>
+    <rect x="277" y="228" width="36" height="16" rx="4" fill="#ffffff" stroke="#bbf7d0"/>
+    <path d="M288 236 L292 240 L300 232" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="277" y="248" width="36" height="16" rx="4" fill="#ffffff" stroke="#bbf7d0"/>
+    <path d="M288 256 L292 260 L300 252" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Mini Team Avatars Floating around -->
+  <g filter="url(#softShadowReg)">
+    <circle cx="140" cy="280" r="16" fill="#681b45" stroke="#ffffff" stroke-width="2"/>
+    <text x="140" y="284" fill="#ffffff" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle">JS</text>
+  </g>
+
+  <g filter="url(#softShadowReg)">
+    <circle cx="340" cy="275" r="16" fill="#1e293b" stroke="#ffffff" stroke-width="2"/>
+    <text x="340" y="279" fill="#ffffff" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle">MK</text>
+  </g>
+
+  <g filter="url(#softShadowReg)">
+    <circle cx="240" cy="335" r="18" fill="#c65d36" stroke="#ffffff" stroke-width="2"/>
+    <text x="240" y="340" fill="#ffffff" font-family="sans-serif" font-size="12" font-weight="700" text-anchor="middle">DEV</text>
+  </g>
+
+  <!-- Botanical foliage at the bottom -->
+  <path d="M150 348 C130 330 115 295 140 280 C146 305 152 325 150 348 Z" fill="#681b45"/>
+  <path d="M165 348 C140 320 135 280 170 290 C168 315 168 335 165 348 Z" fill="#e8985e"/>
+  <path d="M330 348 C350 330 365 295 340 280 C334 305 328 325 330 348 Z" fill="#681b45"/>
+  <path d="M315 348 C340 320 345 280 310 290 C312 315 312 335 315 348 Z" fill="#e8985e"/>
+  <ellipse cx="240" cy="358" rx="110" ry="12" fill="#581439" opacity="0.2"/>
+</svg>
+

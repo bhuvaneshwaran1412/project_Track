@@ -1,0 +1,16 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Center vertical stem -->
+  <rect x="22" y="8" width="4" height="32" rx="2" fill="#681b45"/>
+  
+  <!-- Horizontal crossbar -->
+  <rect x="12" y="22" width="24" height="4" rx="2" fill="#681b45"/>
+  
+  <!-- Left accent dots -->
+  <circle cx="14" cy="14" r="2.5" fill="#681b45"/>
+  <circle cx="14" cy="34" r="2.5" fill="#681b45"/>
+  
+  <!-- Right accent dots -->
+  <circle cx="34" cy="14" r="2.5" fill="#681b45"/>
+  <circle cx="34" cy="34" r="2.5" fill="#681b45"/>
+</svg>
+
