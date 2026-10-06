@@ -1,7 +1,11 @@
 const path = require("path");
-const fs = require("fs");
 const multer = require("multer");
 const db = require("../config/db");
+const {
+  uploadFileToS3,
+  getFileFromS3,
+  deleteFileFromS3
+} = require("../config/s3Service");
 const { logActivity } = require("../models/activityModel");
 const {
   createFileRecord,
@@ -9,28 +13,8 @@ const {
   getFileById
 } = require("../models/fileModel");
 
-// Configure disk storage for Multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const projectId = req.body.projectId || req.params.projectId || "general";
-    const uploadDir = path.join(__dirname, "..", "uploads", String(projectId));
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    // Generate safe timestamped filename
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const safeName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
-    cb(null, `${uniqueSuffix}-${safeName}`);
-  }
-});
-
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 50 * 1024 * 1024 // 50 MB limit
   }
@@ -57,42 +41,41 @@ const uploadFile = async (req, res) => {
 
   const projectId = Number(req.body.projectId);
 
-  if (!projectId) {
-    // Clean up uploaded file if project ID is missing
-    if (fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-
+  if (!Number.isInteger(projectId) || projectId <= 0) {
     return res.status(400).json({
       success: false,
       message: "Valid project ID is required."
     });
   }
 
+  let s3ObjectKey;
+  let fileRecordCreated = false;
+
   try {
     const isMember = await verifyProjectMembership(projectId, req.user.userId);
 
     if (!isMember) {
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
-
       return res.status(403).json({
         success: false,
         message: "You are not a member of this project."
       });
     }
 
-    // Store relative or normalized local path in s3_object_key
-    const localKey = path.relative(path.join(__dirname, ".."), req.file.path).replace(/\\/g, "/");
+    ({ s3ObjectKey } = await uploadFileToS3(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
+      projectId
+    ));
 
     const fileId = await createFileRecord({
       projectId,
       uploadedBy: req.user.userId,
       fileName: req.file.originalname,
-      s3ObjectKey: localKey,
+      s3ObjectKey,
       fileSize: req.file.size
     });
+    fileRecordCreated = true;
 
     await logActivity(
       projectId,
@@ -112,8 +95,12 @@ const uploadFile = async (req, res) => {
       }
     });
   } catch (error) {
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+    if (s3ObjectKey && !fileRecordCreated) {
+      try {
+        await deleteFileFromS3(s3ObjectKey);
+      } catch (cleanupError) {
+        console.error("Unable to clean up S3 upload:", cleanupError);
+      }
     }
 
     console.error("Upload file error:", error);
@@ -190,18 +177,38 @@ const downloadFile = async (req, res) => {
       });
     }
 
-    const absolutePath = path.isAbsolute(file.s3_object_key)
-      ? file.s3_object_key
-      : path.join(__dirname, "..", file.s3_object_key);
+    if (file.s3_object_key.startsWith("uploads/")) {
+      const absolutePath = path.resolve(__dirname, "..", file.s3_object_key);
+      const uploadsRoot = path.resolve(__dirname, "..", "uploads") + path.sep;
 
-    if (!fs.existsSync(absolutePath)) {
-      return res.status(404).json({
-        success: false,
-        message: "File does not exist on disk."
+      if (!absolutePath.startsWith(uploadsRoot)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid file location."
+        });
+      }
+
+      return res.download(absolutePath, file.file_name, (error) => {
+        if (error && !res.headersSent) {
+          console.error("Download legacy local file error:", error);
+          res.status(404).json({
+            success: false,
+            message: "File does not exist on disk."
+          });
+        }
       });
     }
 
-    return res.download(absolutePath, file.file_name);
+    const s3Object = await getFileFromS3(file.s3_object_key);
+    if (s3Object.ContentType) {
+      res.type(s3Object.ContentType);
+    }
+    res.attachment(file.file_name);
+    s3Object.Body.on("error", (error) => {
+      console.error("S3 file stream error:", error);
+      res.destroy(error);
+    });
+    return s3Object.Body.pipe(res);
   } catch (error) {
     console.error("Download file error:", error);
 
@@ -218,4 +225,3 @@ module.exports = {
   getProjectFiles,
   downloadFile
 };
-
