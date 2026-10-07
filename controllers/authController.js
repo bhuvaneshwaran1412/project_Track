@@ -1,6 +1,9 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const db = require("../config/db");
+const { CognitoIdentityProviderClient, AdminCreateUserCommand, AdminSetUserPasswordCommand, AdminInitiateAuthCommand } = require("@aws-sdk/client-cognito-identity-provider");
+
+const cognitoClient = new CognitoIdentityProviderClient({ region: process.env.AWS_REGION || "ap-southeast-2" });
 
 const registerStudent = async (req, res) => {
   const {
@@ -95,6 +98,31 @@ const registerStudent = async (req, res) => {
       ]
     );
 
+    // Sync with Cognito
+    if (process.env.COGNITO_USER_POOL_ID) {
+      try {
+        await cognitoClient.send(new AdminCreateUserCommand({
+          UserPoolId: process.env.COGNITO_USER_POOL_ID,
+          Username: cleanEmail,
+          UserAttributes: [
+            { Name: 'email', Value: cleanEmail },
+            { Name: 'email_verified', Value: 'true' }
+          ],
+          MessageAction: 'SUPPRESS'
+        }));
+        
+        await cognitoClient.send(new AdminSetUserPasswordCommand({
+          UserPoolId: process.env.COGNITO_USER_POOL_ID,
+          Username: cleanEmail,
+          Password: password,
+          Permanent: true
+        }));
+      } catch (cognitoError) {
+        console.error("Cognito sync failed, but local DB user created:", cognitoError);
+        // We do not fail the request if Cognito fails for now, to ensure stability
+      }
+    }
+
     return res.status(201).json({
       success: true,
       message: "Account created successfully. You can now log in.",
@@ -152,13 +180,32 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const passwordMatches = await bcrypt.compare(password, user.password_hash);
-
-    if (!passwordMatches) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password."
-      });
+    if (process.env.COGNITO_CLIENT_ID && process.env.COGNITO_USER_POOL_ID) {
+      try {
+        await cognitoClient.send(new AdminInitiateAuthCommand({
+          AuthFlow: "ADMIN_NO_SRP_AUTH",
+          UserPoolId: process.env.COGNITO_USER_POOL_ID,
+          ClientId: process.env.COGNITO_CLIENT_ID,
+          AuthParameters: {
+            USERNAME: email,
+            PASSWORD: password
+          }
+        }));
+      } catch (cognitoError) {
+        console.error("Cognito login failed:", cognitoError);
+        return res.status(401).json({
+          success: false,
+          message: "Invalid email or password (Cognito rejection)."
+        });
+      }
+    } else {
+      const passwordMatches = await bcrypt.compare(password, user.password_hash);
+      if (!passwordMatches) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid email or password."
+        });
+      }
     }
 
     const token = jwt.sign(

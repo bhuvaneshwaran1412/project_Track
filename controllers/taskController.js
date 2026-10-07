@@ -1,6 +1,9 @@
 const db = require("../config/db");
 const { logActivity } = require("../models/activityModel");
 const { addComment, getCommentsByTask } = require("../models/commentModel");
+const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
+
+const snsClient = new SNSClient({ region: process.env.AWS_REGION || "ap-southeast-2" });
 
 const verifyProjectMembership = async (projectId, userId) => {
   const [memberships] = await db.execute(
@@ -134,6 +137,18 @@ const createTask = async (req, res) => {
       "TASK_CREATED",
       `${req.user.name} created task "${cleanTitle}"`
     );
+
+    if (process.env.SNS_TOPIC_ARN) {
+      try {
+        await snsClient.send(new PublishCommand({
+          TopicArn: process.env.SNS_TOPIC_ARN,
+          Subject: "New Task Assigned",
+          Message: `A new task "${cleanTitle}" (Priority: ${cleanPriority}) has been assigned. Deadline: ${deadline}`
+        }));
+      } catch (snsError) {
+        console.error("Failed to publish to SNS:", snsError);
+      }
+    }
 
     return res.status(201).json({
       success: true,

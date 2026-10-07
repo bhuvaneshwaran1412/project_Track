@@ -14,6 +14,10 @@ Parameters:
     Type: String
     Default: projecttrack
     Description: Database Name
+  AdminEmail:
+    Type: String
+    Description: Email address to receive SNS notifications
+    Default: bhuvaneshwaran1412@gmail.com
 
 Resources:
   # S3 Bucket for App Uploads
@@ -53,6 +57,15 @@ Resources:
                 Resource:
                   - !Sub ${AppStorageBucket.Arn}
                   - !Sub ${AppStorageBucket.Arn}/*
+        - PolicyName: CognitoSNSAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:*
+                  - sns:Publish
+                Resource: "*"
 
   WebServerInstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -74,7 +87,7 @@ Resources:
       MasterUserPassword: !Ref DBPassword
       PubliclyAccessible: true
       VPCSecurityGroups:
-        - !Ref DBSecurityGroup
+        - !GetAtt DBSecurityGroup.GroupId
 
   # Security Group for Database (Allow traffic from Beanstalk / Anywhere for testing)
   DBSecurityGroup:
@@ -87,6 +100,47 @@ Resources:
           ToPort: 3306
           CidrIp: 0.0.0.0/0
 
+  # Cognito User Pool
+  ProjectTrackUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: ProjectTrackUsers
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 6
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+
+  # Cognito User Pool Client
+  ProjectTrackUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: project-track-web
+      UserPoolId: !Ref ProjectTrackUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_ADMIN_USER_PASSWORD_AUTH
+
+  # SNS Topic for Notifications
+  ProjectTrackNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: ProjectTrackAlerts
+
+  # SNS Subscription (Optional, emails the admin)
+  ProjectTrackTopicSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref AdminEmail
+      Protocol: email
+      TopicArn: !Ref ProjectTrackNotificationTopic
+
   # Elastic Beanstalk Application
   EBApplication:
     Type: AWS::ElasticBeanstalk::Application
@@ -98,7 +152,7 @@ Resources:
     Type: AWS::ElasticBeanstalk::Environment
     Properties:
       ApplicationName: !Ref EBApplication
-      SolutionStackName: 64bit Amazon Linux 2023 v6.1.6 running Node.js 20
+      SolutionStackName: 64bit Amazon Linux 2023 v6.11.9 running Node.js 22
       OptionSettings:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: IamInstanceProfile
@@ -121,6 +175,18 @@ Resources:
         - Namespace: aws:elasticbeanstalk:application:environment
           OptionName: PORT
           Value: 8080
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: JWT_SECRET
+          Value: "super_secret_jwt_key_12345!"
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: COGNITO_USER_POOL_ID
+          Value: !Ref ProjectTrackUserPool
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: COGNITO_CLIENT_ID
+          Value: !Ref ProjectTrackUserPoolClient
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: SNS_TOPIC_ARN
+          Value: !Ref ProjectTrackNotificationTopic
 
 Outputs:
   WebsiteURL:
