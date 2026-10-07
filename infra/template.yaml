@@ -1,0 +1,131 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Project Track Infrastructure Setup (S3, RDS, Elastic Beanstalk)'
+
+Parameters:
+  DBUser:
+    Type: String
+    Description: Database Admin Username
+    Default: admin
+  DBPassword:
+    Type: String
+    NoEcho: true
+    Description: Database Admin Password
+  DBName:
+    Type: String
+    Default: projecttrack
+    Description: Database Name
+
+Resources:
+  # S3 Bucket for App Uploads
+  AppStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # IAM Role for Beanstalk EC2 instances to access S3
+  WebServerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier
+      Policies:
+        - PolicyName: S3AccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub ${AppStorageBucket.Arn}
+                  - !Sub ${AppStorageBucket.Arn}/*
+
+  WebServerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref WebServerRole
+
+  # RDS MySQL Database
+  MySQLDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: mysql
+      EngineVersion: 8.0
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: 20
+      DBName: !Ref DBName
+      MasterUsername: !Ref DBUser
+      MasterUserPassword: !Ref DBPassword
+      PubliclyAccessible: true
+      VPCSecurityGroups:
+        - !Ref DBSecurityGroup
+
+  # Security Group for Database (Allow traffic from Beanstalk / Anywhere for testing)
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow MySQL access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 0.0.0.0/0
+
+  # Elastic Beanstalk Application
+  EBApplication:
+    Type: AWS::ElasticBeanstalk::Application
+    Properties:
+      Description: Project Track App
+
+  # Elastic Beanstalk Environment
+  EBEnvironment:
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties:
+      ApplicationName: !Ref EBApplication
+      SolutionStackName: 64bit Amazon Linux 2023 v6.1.6 running Node.js 20
+      OptionSettings:
+        - Namespace: aws:autoscaling:launchconfiguration
+          OptionName: IamInstanceProfile
+          Value: !Ref WebServerInstanceProfile
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: DB_HOST
+          Value: !GetAtt MySQLDatabase.Endpoint.Address
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: DB_USER
+          Value: !Ref DBUser
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: DB_PASSWORD
+          Value: !Ref DBPassword
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: DB_NAME
+          Value: !Ref DBName
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: AWS_S3_BUCKET_NAME
+          Value: !Ref AppStorageBucket
+        - Namespace: aws:elasticbeanstalk:application:environment
+          OptionName: PORT
+          Value: 8080
+
+Outputs:
+  WebsiteURL:
+    Value: !GetAtt EBEnvironment.EndpointURL
+  BucketName:
+    Value: !Ref AppStorageBucket
+  DBEndpoint:
+    Value: !GetAtt MySQLDatabase.Endpoint.Address
