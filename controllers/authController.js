@@ -180,6 +180,7 @@ const loginUser = async (req, res) => {
       });
     }
 
+    let cognitoSuccess = false;
     if (process.env.COGNITO_CLIENT_ID && process.env.COGNITO_USER_POOL_ID) {
       try {
         await cognitoClient.send(new AdminInitiateAuthCommand({
@@ -191,14 +192,14 @@ const loginUser = async (req, res) => {
             PASSWORD: password
           }
         }));
+        cognitoSuccess = true;
       } catch (cognitoError) {
-        console.error("Cognito login failed:", cognitoError);
-        return res.status(401).json({
-          success: false,
-          message: "Invalid email or password (Cognito rejection)."
-        });
+        console.warn("Cognito login failed, attempting MySQL fallback...", cognitoError.name);
+        // Do not return here, allow it to fall back to MySQL for old users
       }
-    } else {
+    }
+
+    if (!cognitoSuccess) {
       const passwordMatches = await bcrypt.compare(password, user.password_hash);
       if (!passwordMatches) {
         return res.status(401).json({
@@ -206,6 +207,9 @@ const loginUser = async (req, res) => {
           message: "Invalid email or password."
         });
       }
+      
+      // Optional: Since they successfully logged in via MySQL, we could sync them to Cognito here
+      // But just letting them log in is enough for now.
     }
 
     const token = jwt.sign(
