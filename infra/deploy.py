@@ -19,8 +19,10 @@ def zip_project(zip_filename):
                 zipf.write(file_path, arcname)
     print(f"Project zipped into {zip_filename}")
 
+AWS_REGION = 'ap-southeast-2'
+
 def deploy_infrastructure(stack_name, template_file, db_password):
-    cf_client = boto3.client('cloudformation')
+    cf_client = boto3.client('cloudformation', region_name=AWS_REGION)
     
     with open(template_file, 'r') as f:
         template_body = f.read()
@@ -67,9 +69,23 @@ def deploy_infrastructure(stack_name, template_file, db_password):
     return {output['OutputKey']: output['OutputValue'] for output in outputs}
 
 def deploy_app_version(app_name, env_name, zip_filename, s3_bucket):
-    s3_client = boto3.client('s3')
-    eb_client = boto3.client('elasticbeanstalk')
+    s3_client = boto3.client('s3', region_name=AWS_REGION)
+    eb_client = boto3.client('elasticbeanstalk', region_name=AWS_REGION)
     
+    # Wait for environment to be Ready before deploying if another update was in progress
+    print(f"Checking environment {env_name} status...")
+    while True:
+        env_resp = eb_client.describe_environments(
+            ApplicationName=app_name,
+            EnvironmentNames=[env_name]
+        )
+        current_status = env_resp['Environments'][0]['Status']
+        if current_status == 'Ready':
+            print(f"Environment {env_name} is Ready.")
+            break
+        print(f"Environment is currently in '{current_status}' state. Waiting 15s...")
+        time.sleep(15)
+
     version_label = f"v-{int(time.time())}"
     s3_key = f"app-versions/{version_label}.zip"
     
@@ -126,7 +142,7 @@ if __name__ == "__main__":
     bucket_name = outputs['BucketName']
     
     # Dynamically resolve Application Name and Environment Name from CloudFormation resources
-    cf_client = boto3.client('cloudformation')
+    cf_client = boto3.client('cloudformation', region_name=AWS_REGION)
     resources = cf_client.describe_stack_resources(StackName=STACK_NAME)['StackResources']
     app_name = next(r['PhysicalResourceId'] for r in resources if r['LogicalResourceId'] == 'EBApplication')
     env_name = next(r['PhysicalResourceId'] for r in resources if r['LogicalResourceId'] == 'EBEnvironment')
