@@ -115,7 +115,6 @@ if __name__ == "__main__":
 
     STACK_NAME = 'project-track-stack'
     TEMPLATE_FILE = 'infra/template.yaml'
-    APP_NAME = 'Project Track App'
     ZIP_FILE = 'app.zip'
     
     # 1. Zip project
@@ -126,13 +125,14 @@ if __name__ == "__main__":
     
     bucket_name = outputs['BucketName']
     
-    # Need to get Environment Name from EB Client because CF output doesn't give it directly unless specified
-    eb_client = boto3.client('elasticbeanstalk')
-    envs = eb_client.describe_environments(ApplicationName=APP_NAME)['Environments']
-    env_name = envs[0]['EnvironmentName']
+    # Dynamically resolve Application Name and Environment Name from CloudFormation resources
+    cf_client = boto3.client('cloudformation')
+    resources = cf_client.describe_stack_resources(StackName=STACK_NAME)['StackResources']
+    app_name = next(r['PhysicalResourceId'] for r in resources if r['LogicalResourceId'] == 'EBApplication')
+    env_name = next(r['PhysicalResourceId'] for r in resources if r['LogicalResourceId'] == 'EBEnvironment')
     
     # 3. Deploy App to Beanstalk
-    deploy_app_version(APP_NAME, env_name, ZIP_FILE, bucket_name)
+    deploy_app_version(app_name, env_name, ZIP_FILE, bucket_name)
     
     print("\n===========================")
     print("DEPLOYMENT COMPLETE")
