@@ -1,0 +1,62 @@
+=====================================================
+STUDENT PROJECT MANAGEMENT PLATFORM - PROJECT SUMMARY
+=====================================================
+
+1. PROJECT OVERVIEW
+-------------------
+The Student Project Management Platform is an Agile project management web 
+application built with Node.js and Express. It enables students, team leads, 
+and faculty/administrators to collaborate, manage sprint backlogs, track task 
+progress, and organize academic deliverables in a unified workspace.
+
+2. CORE PLATFORM FEATURES
+-------------------------
+- Role-Based Access Control (RBAC):
+  * Platform Roles: Admin (global oversight) and Student (standard user).
+  * Project Roles: Team Lead (manage team & assignments) and Member.
+- Agile Sprint & Backlog Management:
+  * Create and manage sprint iterations.
+  * Backlog prioritization and status tracking (To-Do, In-Progress, Completed).
+- Task Assignment & Real-Time Tracking:
+  * Assign tasks to specific team members with deadlines and priorities.
+- Secure Cloud File Storage:
+  * Upload and download project attachments and documentation.
+- Automated Alert System:
+  * Instant notifications sent when new tasks or projects are assigned.
+
+3. AWS CLOUD SERVICES USED & ARCHITECTURE
+-----------------------------------------
+The application is deployed on Amazon Web Services (AWS) using a production-grade,
+automated cloud architecture:
+
+- AWS Elastic Beanstalk (EC2 & Auto Scaling):
+  * Hosts and scales the Node.js application server.
+  * Automatically provisions EC2 instances running Amazon Linux 2023 with Node.js 22.
+- Amazon RDS (Relational Database Service) - MySQL:
+  * Managed MySQL 8.0 database storing all application relational data 
+    (users, projects, teams, tasks, sprints).
+- Amazon S3 (Simple Storage Service):
+  * Scalable object storage for project attachments and user-uploaded files.
+- Amazon Cognito:
+  * Secure identity provider managing user pools, authentication tokens, and password policies.
+- Amazon SNS (Simple Notification Service):
+  * Cloud notification engine used to dispatch email alerts when tasks are assigned.
+- AWS CloudFormation (Infrastructure as Code - IaC):
+  * Declarative template (`infra/template.yaml`) that provisions all AWS resources 
+    automatically and reproducibly.
+- AWS IAM (Identity and Access Management):
+  * Least-privilege roles allowing the EC2 instances to communicate securely 
+    with S3, Cognito, and SNS without hardcoded credentials.
+
+4. CI/CD PIPELINE (Continuous Integration / Continuous Deployment)
+------------------------------------------------------------------
+The project leverages GitHub Actions for full DevOps automation:
+
+- Continuous Integration (`.github/workflows/ci.yml`):
+  * Runs on every push/pull request to `main`.
+  * Installs dependencies and runs syntax and lint checks on `server.js`.
+- Continuous Deployment (`.github/workflows/deploy.yml`):
+  * Automatically connects to AWS via secure GitHub repository secrets.
+  * Runs Python deployment automation (`infra/deploy.py`) using Boto3.
+  * Deploys the latest code bundle to Elastic Beanstalk.
+  * Applies database migrations from `backup.sql` automatically.
