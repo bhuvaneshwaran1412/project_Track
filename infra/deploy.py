@@ -4,6 +4,10 @@ import zipfile
 import time
 import argparse
 
+for var in ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION', 'AWS_REGION']:
+    if var in os.environ and os.environ[var]:
+        os.environ[var] = os.environ[var].strip()
+
 def zip_project(zip_filename):
     print("Zipping project files...")
     ignore_dirs = ['.git', 'node_modules', 'infra']

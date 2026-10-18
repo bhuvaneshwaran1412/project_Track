@@ -30,6 +30,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-southeast-2
 
+      - name: Verify AWS Connection
+        run: |
+          python -c "import boto3, os; [os.environ.update({k: v.strip()}) for k, v in os.environ.items() if 'AWS' in k]; sts = boto3.client('sts', region_name='ap-southeast-2'); print('SUCCESS: Connected to AWS as', sts.get_caller_identity()['Arn'])"
+
       - name: Deploy Infrastructure and App
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
