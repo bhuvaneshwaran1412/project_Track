@@ -33,7 +33,7 @@ jobs:
       - name: Deploy Infrastructure and App
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: python infra/deploy.py --db-password "$DB_PASSWORD"
+        run: python -u infra/deploy.py --db-password "${DB_PASSWORD:-AdminPass123!}"
 
       - name: Initialize Database
         continue-on-error: true

@@ -125,37 +125,45 @@ def deploy_app_version(app_name, env_name, zip_filename, s3_bucket):
     print("Application deployment completed successfully!")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--db-password', required=True, help='Database password')
-    args = parser.parse_args()
+    import sys
+    import traceback
+    try:
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--db-password', default='AdminPass123!', help='Database password')
+        args = parser.parse_args()
+        db_password = args.db_password if args.db_password else 'AdminPass123!'
 
-    STACK_NAME = 'project-track-stack'
-    TEMPLATE_FILE = 'infra/template.yaml'
-    ZIP_FILE = 'app.zip'
-    
-    # 1. Zip project
-    zip_project(ZIP_FILE)
-    
-    # 2. Deploy Infrastructure
-    outputs = deploy_infrastructure(STACK_NAME, TEMPLATE_FILE, args.db_password)
-    
-    bucket_name = outputs['BucketName']
-    
-    # Dynamically resolve Application Name and Environment Name from CloudFormation resources
-    cf_client = boto3.client('cloudformation', region_name=AWS_REGION)
-    resources = cf_client.describe_stack_resources(StackName=STACK_NAME)['StackResources']
-    app_name = next(r['PhysicalResourceId'] for r in resources if r['LogicalResourceId'] == 'EBApplication')
-    env_name = next(r['PhysicalResourceId'] for r in resources if r['LogicalResourceId'] == 'EBEnvironment')
-    
-    # 3. Deploy App to Beanstalk
-    deploy_app_version(app_name, env_name, ZIP_FILE, bucket_name)
-    
-    print("\n===========================")
-    print("DEPLOYMENT COMPLETE")
-    print(f"Website URL: http://{outputs['WebsiteURL']}")
-    print("===========================\n")
+        STACK_NAME = 'project-track-stack'
+        TEMPLATE_FILE = 'infra/template.yaml'
+        ZIP_FILE = 'app.zip'
+        
+        # 1. Zip project
+        zip_project(ZIP_FILE)
+        
+        # 2. Deploy Infrastructure
+        outputs = deploy_infrastructure(STACK_NAME, TEMPLATE_FILE, db_password)
+        
+        bucket_name = outputs['BucketName']
+        
+        # Dynamically resolve Application Name and Environment Name from CloudFormation resources
+        cf_client = boto3.client('cloudformation', region_name=AWS_REGION)
+        resources = cf_client.describe_stack_resources(StackName=STACK_NAME)['StackResources']
+        app_name = next(r['PhysicalResourceId'] for r in resources if r['LogicalResourceId'] == 'EBApplication')
+        env_name = next(r['PhysicalResourceId'] for r in resources if r['LogicalResourceId'] == 'EBEnvironment')
+        
+        # 3. Deploy App to Beanstalk
+        deploy_app_version(app_name, env_name, ZIP_FILE, bucket_name)
+        
+        print("\n===========================", flush=True)
+        print("DEPLOYMENT COMPLETE", flush=True)
+        print(f"Website URL: http://{outputs['WebsiteURL']}", flush=True)
+        print("===========================\n", flush=True)
 
-    github_env = os.environ.get('GITHUB_ENV')
-    if github_env:
-        with open(github_env, 'a') as f:
-            f.write(f"DB_HOST={outputs['DBEndpoint']}\n")
+        github_env = os.environ.get('GITHUB_ENV')
+        if github_env:
+            with open(github_env, 'a') as f:
+                f.write(f"DB_HOST={outputs['DBEndpoint']}\n")
+    except Exception as e:
+        print("\n*** DEPLOYMENT FAILED WITH EXCEPTION ***", flush=True)
+        traceback.print_exc()
+        sys.exit(1)
