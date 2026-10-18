@@ -37,7 +37,16 @@ jobs:
       - name: Deploy Infrastructure and App
         env:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        run: python -u infra/deploy.py --db-password "${DB_PASSWORD:-AdminPass123!}"
+        run: |
+          python -u infra/deploy.py --db-password "${DB_PASSWORD:-AdminPass123!}" 2>&1 | tee deploy_output.log
+
+      - name: Show Deploy Output
+        if: always()
+        run: |
+          echo "### Deployment Execution Log" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat deploy_output.log >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Initialize Database
         continue-on-error: true

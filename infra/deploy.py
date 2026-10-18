@@ -31,9 +31,16 @@ def deploy_infrastructure(stack_name, template_file, db_password):
     with open(template_file, 'r') as f:
         template_body = f.read()
         
-    print(f"Deploying CloudFormation stack: {stack_name}...")
-    
+    print(f"Checking CloudFormation stack: {stack_name}...", flush=True)
+    stack_exists = False
     try:
+        cf_client.describe_stacks(StackName=stack_name)
+        stack_exists = True
+    except Exception:
+        stack_exists = False
+
+    if not stack_exists:
+        print(f"Creating CloudFormation stack: {stack_name}...", flush=True)
         cf_client.create_stack(
             StackName=stack_name,
             TemplateBody=template_body,
@@ -42,12 +49,12 @@ def deploy_infrastructure(stack_name, template_file, db_password):
             ],
             Capabilities=['CAPABILITY_NAMED_IAM']
         )
-        print("Stack creation initiated. Waiting for completion (this may take 10-15 minutes)...")
+        print("Stack creation initiated. Waiting for completion (this may take 10-15 minutes)...", flush=True)
         waiter = cf_client.get_waiter('stack_create_complete')
         waiter.wait(StackName=stack_name, WaiterConfig={'Delay': 30, 'MaxAttempts': 60})
-        print("Stack created successfully!")
-    except cf_client.exceptions.AlreadyExistsException:
-        print("Stack already exists. Updating...")
+        print("Stack created successfully!", flush=True)
+    else:
+        print(f"Stack {stack_name} exists. Checking for updates...", flush=True)
         try:
             cf_client.update_stack(
                 StackName=stack_name,
@@ -57,15 +64,15 @@ def deploy_infrastructure(stack_name, template_file, db_password):
                 ],
                 Capabilities=['CAPABILITY_NAMED_IAM']
             )
-            print("Stack update initiated. Waiting for completion...")
+            print("Stack update initiated. Waiting for completion...", flush=True)
             waiter = cf_client.get_waiter('stack_update_complete')
             waiter.wait(StackName=stack_name, WaiterConfig={'Delay': 30, 'MaxAttempts': 60})
-            print("Stack updated successfully!")
+            print("Stack updated successfully!", flush=True)
         except Exception as e:
             if 'No updates are to be performed' in str(e):
-                print("No infrastructure updates required.")
+                print("No infrastructure updates required.", flush=True)
             else:
-                raise e
+                print(f"Stack update status: {e}", flush=True)
 
     # Get outputs
     response = cf_client.describe_stacks(StackName=stack_name)
