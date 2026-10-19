@@ -119,17 +119,19 @@ def deploy_app_version(app_name, env_name, zip_filename, s3_bucket):
     )
     
     print("Deployment initiated. Waiting for environment to update...")
-    time.sleep(10) # Give it a moment to start
+    time.sleep(15) # Give it a moment to start
     while True:
         response = eb_client.describe_environments(
             ApplicationName=app_name,
             EnvironmentNames=[env_name]
         )
-        status = response['Environments'][0]['Status']
-        health = response['Environments'][0]['Health']
-        print(f"Status: {status}, Health: {health}")
+        env_data = response['Environments'][0]
+        status = env_data['Status']
+        health = env_data['Health']
+        current_version = env_data.get('VersionLabel', '')
+        print(f"Status: {status}, Health: {health}, Version: {current_version}", flush=True)
         
-        if status == 'Ready':
+        if status == 'Ready' and current_version == version_label:
             break
         time.sleep(15)
     
