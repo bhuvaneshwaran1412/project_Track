@@ -4,3 +4,5 @@ node_modules/
 app.zip
 __pycache__/
 *.pyc
+.env*
+*.pem

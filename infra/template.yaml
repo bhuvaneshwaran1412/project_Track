@@ -17,7 +17,7 @@ Parameters:
   AdminEmail:
     Type: String
     Description: Email address to receive SNS notifications
-    Default: bhuvaneshwaran1412@gmail.com
+    Default: bhuvaneshwaran141206@gmail.com
 
 Resources:
   # S3 Bucket for App Uploads

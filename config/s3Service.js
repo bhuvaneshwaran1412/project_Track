@@ -10,7 +10,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION || "ap-southeast-2"
+  region: process.env.AWS_REGION || "us-east-1"
 });
 
 const getBucketName = () => {
