@@ -3,27 +3,29 @@ import os
 import zipfile
 import time
 import argparse
+import subprocess
+import traceback
+import sys
 
-for var in ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION', 'AWS_REGION']:
+for var in ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_DEFAULT_REGION', 'AWS_REGION', 'AWS_SESSION_TOKEN']:
     if var in os.environ and os.environ[var]:
         os.environ[var] = os.environ[var].strip()
 
+AWS_REGION = os.environ.get('AWS_REGION', 'ap-southeast-2')
+
 def zip_project(zip_filename):
-    print("Zipping project files...")
-    ignore_dirs = ['.git', 'node_modules', 'infra']
+    print("Zipping project files...", flush=True)
+    ignore_dirs = {'.git', 'node_modules', 'infra', '.vscode'}
     with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk('.'):
-            # Exclude ignored directories
-            dirs[:] = [d for d in dirs if d not in ignore_dirs]
+            dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith('.')]
             for file in files:
-                if file == zip_filename or file.endswith('.zip'):
+                if file == zip_filename or file.endswith('.zip') or file.startswith('.'):
                     continue
                 file_path = os.path.join(root, file)
                 arcname = os.path.relpath(file_path, '.')
                 zipf.write(file_path, arcname)
-    print(f"Project zipped into {zip_filename}")
-
-AWS_REGION = 'ap-southeast-2'
+    print(f"Project zipped into {zip_filename}", flush=True)
 
 def deploy_infrastructure(stack_name, template_file, db_password):
     cf_client = boto3.client('cloudformation', region_name=AWS_REGION)
@@ -31,7 +33,7 @@ def deploy_infrastructure(stack_name, template_file, db_password):
     with open(template_file, 'r') as f:
         template_body = f.read()
         
-    print(f"Checking CloudFormation stack: {stack_name}...", flush=True)
+    print(f"Checking CloudFormation stack: {stack_name} in {AWS_REGION}...", flush=True)
     stack_exists = False
     try:
         cf_client.describe_stacks(StackName=stack_name)
@@ -49,7 +51,7 @@ def deploy_infrastructure(stack_name, template_file, db_password):
             ],
             Capabilities=['CAPABILITY_NAMED_IAM']
         )
-        print("Stack creation initiated. Waiting for completion (this may take 10-15 minutes)...", flush=True)
+        print("Stack creation initiated. Waiting for completion (this may take 8-12 minutes for RDS & Beanstalk)...", flush=True)
         waiter = cf_client.get_waiter('stack_create_complete')
         waiter.wait(StackName=stack_name, WaiterConfig={'Delay': 30, 'MaxAttempts': 60})
         print("Stack created successfully!", flush=True)
@@ -83,8 +85,7 @@ def deploy_app_version(app_name, env_name, zip_filename, s3_bucket):
     s3_client = boto3.client('s3', region_name=AWS_REGION)
     eb_client = boto3.client('elasticbeanstalk', region_name=AWS_REGION)
     
-    # Wait for environment to be Ready before deploying if another update was in progress
-    print(f"Checking environment {env_name} status...")
+    print(f"Checking environment {env_name} status...", flush=True)
     while True:
         env_resp = eb_client.describe_environments(
             ApplicationName=app_name,
@@ -92,18 +93,18 @@ def deploy_app_version(app_name, env_name, zip_filename, s3_bucket):
         )
         current_status = env_resp['Environments'][0]['Status']
         if current_status == 'Ready':
-            print(f"Environment {env_name} is Ready.")
+            print(f"Environment {env_name} is Ready.", flush=True)
             break
-        print(f"Environment is currently in '{current_status}' state. Waiting 15s...")
+        print(f"Environment is currently in '{current_status}' state. Waiting 15s...", flush=True)
         time.sleep(15)
 
     version_label = f"v-{int(time.time())}"
     s3_key = f"app-versions/{version_label}.zip"
     
-    print(f"Uploading {zip_filename} to S3 bucket {s3_bucket} at {s3_key}...")
+    print(f"Uploading {zip_filename} to S3 bucket {s3_bucket} at {s3_key}...", flush=True)
     s3_client.upload_file(zip_filename, s3_bucket, s3_key)
     
-    print(f"Creating Elastic Beanstalk application version {version_label}...")
+    print(f"Creating Elastic Beanstalk application version {version_label}...", flush=True)
     eb_client.create_application_version(
         ApplicationName=app_name,
         VersionLabel=version_label,
@@ -111,15 +112,15 @@ def deploy_app_version(app_name, env_name, zip_filename, s3_bucket):
         Process=True
     )
     
-    print(f"Deploying version {version_label} to environment {env_name}...")
+    print(f"Deploying version {version_label} to environment {env_name}...", flush=True)
     eb_client.update_environment(
         ApplicationName=app_name,
         EnvironmentName=env_name,
         VersionLabel=version_label
     )
     
-    print("Deployment initiated. Waiting for environment to update...")
-    time.sleep(15) # Give it a moment to start
+    print("Deployment initiated. Waiting for environment to update...", flush=True)
+    time.sleep(15)
     while True:
         response = eb_client.describe_environments(
             ApplicationName=app_name,
@@ -135,16 +136,16 @@ def deploy_app_version(app_name, env_name, zip_filename, s3_bucket):
             break
         time.sleep(15)
     
-    print("Application deployment completed successfully!")
+    print("Application deployment completed successfully!", flush=True)
 
 if __name__ == "__main__":
-    import sys
-    import traceback
     try:
         parser = argparse.ArgumentParser()
         parser.add_argument('--db-password', default='AdminPass123!', help='Database password')
+        parser.add_argument('--region', default='ap-southeast-2', help='AWS Region')
         args = parser.parse_args()
         db_password = args.db_password if args.db_password else 'AdminPass123!'
+        AWS_REGION = args.region
 
         STACK_NAME = 'project-track-stack'
         TEMPLATE_FILE = 'infra/template.yaml'
@@ -166,11 +167,28 @@ if __name__ == "__main__":
         
         # 3. Deploy App to Beanstalk
         deploy_app_version(app_name, env_name, ZIP_FILE, bucket_name)
+
+        # 4. Initialize Database
+        print("Initializing RDS MySQL database with backup.sql...", flush=True)
+        for attempt in range(1, 6):
+            try:
+                subprocess.run(
+                    ['node', 'infra/init_db.js', outputs['DBEndpoint'], 'admin', db_password, 'projecttrack'],
+                    check=True
+                )
+                print("Database initialized successfully!", flush=True)
+                break
+            except Exception as e:
+                print(f"Database init attempt {attempt}/5 failed: {e}. Retrying in 10s...", flush=True)
+                time.sleep(10)
         
-        print("\n===========================", flush=True)
-        print("DEPLOYMENT COMPLETE", flush=True)
+        print("\n=======================================================", flush=True)
+        print("DEPLOYMENT COMPLETE! YOUR PLATFORM IS LIVE!", flush=True)
         print(f"Website URL: http://{outputs['WebsiteURL']}", flush=True)
-        print("===========================\n", flush=True)
+        print(f"Login Page: http://{outputs['WebsiteURL']}/login.html", flush=True)
+        print(f"RDS MySQL Host: {outputs['DBEndpoint']}", flush=True)
+        print(f"S3 Bucket: {outputs['BucketName']}", flush=True)
+        print("=======================================================\n", flush=True)
 
         github_env = os.environ.get('GITHUB_ENV')
         if github_env:

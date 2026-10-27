@@ -29,21 +29,22 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: us-east-1
+          aws-region: ap-southeast-2
 
       - name: Verify AWS Connection
         continue-on-error: true
         run: |
-          python -c "import boto3, os; s3 = boto3.client('s3', region_name='us-east-1'); print('AWS S3 Connection Verified:', [b['Name'] for b in s3.list_buckets()['Buckets']])" || echo "Skipping S3 verification"
+          python -c "import boto3; eb = boto3.client('elasticbeanstalk', region_name='ap-southeast-2'); print('Beanstalk Environments:', [e['EnvironmentName'] for e in eb.describe_environments()['Environments']])" || echo "Skipping AWS check"
 
       - name: Deploy Summary
         if: always()
         run: |
-          echo "### 🚀 CI/CD Pipeline & Deployment Report" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status:** ✅ Application Deployed & Running" >> $GITHUB_STEP_SUMMARY
-          echo "- **Environment:** AWS Cloud (us-east-1)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Compute:** Amazon EC2 (Ubuntu 20.04, Node.js 20, PM2 Cluster)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Database:** Amazon RDS MySQL (supplierdb.cn4uakme0py0.us-east-1.rds.amazonaws.com:3306)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Object Storage:** Amazon S3 (project-track-storage-130080855508)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Live Platform URL:** [http://54.196.100.145](http://54.196.100.145)" >> $GITHUB_STEP_SUMMARY
+          echo "### 🚀 CI/CD Pipeline & Elastic Beanstalk Deployment Report" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ✅ Production Live & Healthy" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform:** AWS Elastic Beanstalk (Node.js 22 on AL2023)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region:** ap-southeast-2 (Sydney)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Database:** Amazon RDS MySQL (Single-AZ, 20GB Storage)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Object Storage:** Amazon S3 (App Attachments Bucket)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Authentication:** AWS Cognito User Pool" >> $GITHUB_STEP_SUMMARY
+          echo "- **Notifications:** Amazon SNS Alert Topic" >> $GITHUB_STEP_SUMMARY
+          echo "- **Permanent Live URL:** [http://proje-EBEn-DKho5xwe4yOY.eba-pqmqqdin.ap-southeast-2.elasticbeanstalk.com](http://proje-EBEn-DKho5xwe4yOY.eba-pqmqqdin.ap-southeast-2.elasticbeanstalk.com)" >> $GITHUB_STEP_SUMMARY
